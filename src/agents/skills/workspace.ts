@@ -455,6 +455,27 @@ function truncateString(str: string, maxLength: number): string {
     : inline;
 }
 
+function formatSkillsLazy(skills: Skill[]): string {
+  if (skills.length === 0) {
+    return "";
+  }
+  const lines = [
+    "\n\nThe following skills are available in the workspace. Use the read tool on their location to load instructions when relevant.",
+    "",
+    "<available_skills>",
+  ];
+
+  for (const skill of skills) {
+    lines.push("  <skill>");
+    lines.push(`    <name>${escapeXml(skill.name)}</name>`);
+    lines.push(`    <location>${escapeXml(skill.filePath)}</location>`);
+    lines.push("  </skill>");
+  }
+
+  lines.push("</available_skills>");
+  return lines.join("\n");
+}
+
 function formatSkillsCompact(skills: Skill[]): string {
   if (skills.length === 0) {
     return "";
@@ -491,12 +512,14 @@ function applySkillsPromptLimits(params: {
 } {
   const limits = resolveSkillsLimits(params.config);
   const promptMode = params.config?.skills?.promptMode ?? "full";
-  if (promptMode === "lazy") {
-    return { skillsForPrompt: [], truncated: false, truncatedReason: null };
-  }
 
   const formatter =
-    promptMode === "compact" ? formatSkillsCompact : formatSkillsForPrompt;
+    promptMode === "lazy"
+      ? formatSkillsLazy
+      : promptMode === "compact"
+        ? formatSkillsCompact
+        : formatSkillsForPrompt;
+
   const total = params.skills.length;
   const byCount = params.skills.slice(0, Math.max(0, limits.maxSkillsInPrompt));
 
@@ -590,11 +613,6 @@ function resolveWorkspaceSkillPromptState(
   const resolvedSkills = promptEntries.map((entry) => entry.skill);
   const promptMode = opts?.config?.skills?.promptMode ?? "full";
 
-  if (promptMode === "lazy") {
-    const prompt = [remoteNote].filter(Boolean).join("\n");
-    return { eligible, prompt, resolvedSkills };
-  }
-
   const { skillsForPrompt, truncated } = applySkillsPromptLimits({
     skills: resolvedSkills,
     config: opts?.config,
@@ -604,7 +622,12 @@ function resolveWorkspaceSkillPromptState(
     : "";
 
   const formatter =
-    promptMode === "compact" ? formatSkillsCompact : formatSkillsForPrompt;
+    promptMode === "lazy"
+      ? formatSkillsLazy
+      : promptMode === "compact"
+        ? formatSkillsCompact
+        : formatSkillsForPrompt;
+
   const prompt = [
     remoteNote,
     truncationNote,

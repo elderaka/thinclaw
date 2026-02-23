@@ -714,5 +714,7 @@ export const FIELD_LABELS: Record<string, string> = {
   "plugins.installs.*.integrity": "Plugin Resolved Integrity",
   "plugins.installs.*.shasum": "Plugin Resolved Shasum",
   "plugins.installs.*.resolvedAt": "Plugin Resolution Time",
+  "skills.promptMode": "Skills Prompt Mode",
+  "skills.load.extraDirs": "Extra Skills Directories",
   "plugins.installs.*.installedAt": "Plugin Install Time",
 };
