@@ -19,7 +19,8 @@ ui/playwright-report/
 ui/test-results/
 packages/dashboard-next/.next/
 packages/dashboard-next/out/
-
+shared_workspace
+skills
 # Mise configuration files
 mise.toml
 
@@ -98,25 +99,9 @@ package-lock.json
 .agents/
 .agents
 .agent/
-skills-lock.json
 
 # Local iOS signing overrides
 apps/ios/LocalSigning.xcconfig
-
-# Xcode build directories (xcodebuild output)
-apps/ios/build/
-apps/shared/OpenClawKit/build/
-Swabble/build/
-
 # Generated protocol schema (produced via pnpm protocol:gen)
 dist/protocol.schema.json
 .ant-colony/
-
-# Eclipse
-**/.project
-**/.classpath
-**/.settings/
-**/.gradle/
-
-# Synthing
-**/.stfolder/
