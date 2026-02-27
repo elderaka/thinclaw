@@ -19,7 +19,8 @@ ui/playwright-report/
 ui/test-results/
 packages/dashboard-next/.next/
 packages/dashboard-next/out/
-
+shared_workspaces
+skills
 # Mise configuration files
 mise.toml
 
