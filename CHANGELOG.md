@@ -2,6 +2,13 @@
 
 Docs: https://docs.openclaw.ai
 
+## [Custom Pleiades Patch] (March 2026)
+
+### Security Overrides
+
+- **Gateway/Auth**: [Custom] Removed the hardcoded security block in `src/cli/gateway-cli/run.ts` and `src/gateway/server-runtime-config.ts` that refused to bind the gateway to non-loopback (`0.0.0.0` or `lan`) addresses when `auth.mode="none"` was configured.
+- **Gateway/WebSocket**: [Custom] Modified `src/gateway/server/ws-connection/message-handler.ts` to immediately bypass the `device identity required` authentication handshake and "pairing" checks directly returning `true` whenever `auth.mode = "none"`, allowing Traefik to handle incoming user web traffic.
+
 ## 2026.2.26
 
 ### Changes
