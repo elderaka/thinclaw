@@ -2,7 +2,9 @@ import type { Static } from "@sinclair/typebox";
 import { ProtocolSchemas } from "./protocol-schemas.js";
 
 type ProtocolSchemaName = keyof typeof ProtocolSchemas;
-type SchemaType<TName extends ProtocolSchemaName> = Static<(typeof ProtocolSchemas)[TName]>;
+type SchemaType<TName extends ProtocolSchemaName> = Static<
+  (typeof ProtocolSchemas)[TName]
+>;
 
 export type ConnectParams = SchemaType<"ConnectParams">;
 export type HelloOk = SchemaType<"HelloOk">;
@@ -69,6 +71,7 @@ export type ChannelsStatusParams = SchemaType<"ChannelsStatusParams">;
 export type ChannelsStatusResult = SchemaType<"ChannelsStatusResult">;
 export type ChannelsLogoutParams = SchemaType<"ChannelsLogoutParams">;
 export type WebLoginStartParams = SchemaType<"WebLoginStartParams">;
+export type WebLoginPairPhoneParams = SchemaType<"WebLoginPairPhoneParams">;
 export type WebLoginWaitParams = SchemaType<"WebLoginWaitParams">;
 export type AgentSummary = SchemaType<"AgentSummary">;
 export type AgentsFileEntry = SchemaType<"AgentsFileEntry">;
@@ -112,8 +115,10 @@ export type LogsTailParams = SchemaType<"LogsTailParams">;
 export type LogsTailResult = SchemaType<"LogsTailResult">;
 export type ExecApprovalsGetParams = SchemaType<"ExecApprovalsGetParams">;
 export type ExecApprovalsSetParams = SchemaType<"ExecApprovalsSetParams">;
-export type ExecApprovalsNodeGetParams = SchemaType<"ExecApprovalsNodeGetParams">;
-export type ExecApprovalsNodeSetParams = SchemaType<"ExecApprovalsNodeSetParams">;
+export type ExecApprovalsNodeGetParams =
+  SchemaType<"ExecApprovalsNodeGetParams">;
+export type ExecApprovalsNodeSetParams =
+  SchemaType<"ExecApprovalsNodeSetParams">;
 export type ExecApprovalsSnapshot = SchemaType<"ExecApprovalsSnapshot">;
 export type ExecApprovalRequestParams = SchemaType<"ExecApprovalRequestParams">;
 export type ExecApprovalResolveParams = SchemaType<"ExecApprovalResolveParams">;
