@@ -148,11 +148,7 @@ import {
   SessionsResolveParamsSchema,
   SessionsUsageParamsSchema,
 } from "./sessions.js";
-import {
-  PresenceEntrySchema,
-  SnapshotSchema,
-  StateVersionSchema,
-} from "./snapshot.js";
+import { PresenceEntrySchema, SnapshotSchema, StateVersionSchema } from "./snapshot.js";
 import {
   WizardCancelParamsSchema,
   WizardNextParamsSchema,
