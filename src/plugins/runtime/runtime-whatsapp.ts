@@ -9,30 +9,31 @@ import {
 } from "../../web/auth-store.js";
 import type { PluginRuntime } from "./types.js";
 
-const sendMessageWhatsAppLazy: PluginRuntime["channel"]["whatsapp"]["sendMessageWhatsApp"] =
-  async (...args) => {
-    const { sendMessageWhatsApp } = await loadWebOutbound();
-    return sendMessageWhatsApp(...args);
-  };
-
-const sendPollWhatsAppLazy: PluginRuntime["channel"]["whatsapp"]["sendPollWhatsApp"] =
-  async (...args) => {
-    const { sendPollWhatsApp } = await loadWebOutbound();
-    return sendPollWhatsApp(...args);
-  };
-
-const loginWebLazy: PluginRuntime["channel"]["whatsapp"]["loginWeb"] = async (
+const sendMessageWhatsAppLazy: PluginRuntime["channel"]["whatsapp"]["sendMessageWhatsApp"] = async (
   ...args
 ) => {
+  const { sendMessageWhatsApp } = await loadWebOutbound();
+  return sendMessageWhatsApp(...args);
+};
+
+const sendPollWhatsAppLazy: PluginRuntime["channel"]["whatsapp"]["sendPollWhatsApp"] = async (
+  ...args
+) => {
+  const { sendPollWhatsApp } = await loadWebOutbound();
+  return sendPollWhatsApp(...args);
+};
+
+const loginWebLazy: PluginRuntime["channel"]["whatsapp"]["loginWeb"] = async (...args) => {
   const { loginWeb } = await loadWebLogin();
   return loginWeb(...args);
 };
 
-const startWebLoginWithQrLazy: PluginRuntime["channel"]["whatsapp"]["startWebLoginWithQr"] =
-  async (...args) => {
-    const { startWebLoginWithQr } = await loadWebLoginQr();
-    return startWebLoginWithQr(...args);
-  };
+const startWebLoginWithQrLazy: PluginRuntime["channel"]["whatsapp"]["startWebLoginWithQr"] = async (
+  ...args
+) => {
+  const { startWebLoginWithQr } = await loadWebLoginQr();
+  return startWebLoginWithQr(...args);
+};
 
 const startWebLoginWithPairingCodeLazy: PluginRuntime["channel"]["whatsapp"]["startWebLoginWithPairingCode"] =
   async (...args) => {
@@ -40,17 +41,19 @@ const startWebLoginWithPairingCodeLazy: PluginRuntime["channel"]["whatsapp"]["st
     return startWebLoginWithPairingCode(...args);
   };
 
-const waitForWebLoginLazy: PluginRuntime["channel"]["whatsapp"]["waitForWebLogin"] =
-  async (...args) => {
-    const { waitForWebLogin } = await loadWebLoginQr();
-    return waitForWebLogin(...args);
-  };
+const waitForWebLoginLazy: PluginRuntime["channel"]["whatsapp"]["waitForWebLogin"] = async (
+  ...args
+) => {
+  const { waitForWebLogin } = await loadWebLoginQr();
+  return waitForWebLogin(...args);
+};
 
-const monitorWebChannelLazy: PluginRuntime["channel"]["whatsapp"]["monitorWebChannel"] =
-  async (...args) => {
-    const { monitorWebChannel } = await loadWebChannel();
-    return monitorWebChannel(...args);
-  };
+const monitorWebChannelLazy: PluginRuntime["channel"]["whatsapp"]["monitorWebChannel"] = async (
+  ...args
+) => {
+  const { monitorWebChannel } = await loadWebChannel();
+  return monitorWebChannel(...args);
+};
 
 const handleWhatsAppActionLazy: PluginRuntime["channel"]["whatsapp"]["handleWhatsAppAction"] =
   async (...args) => {
@@ -58,17 +61,11 @@ const handleWhatsAppActionLazy: PluginRuntime["channel"]["whatsapp"]["handleWhat
     return handleWhatsAppAction(...args);
   };
 
-let webLoginQrPromise: Promise<typeof import("../../web/login-qr.js")> | null =
+let webLoginQrPromise: Promise<typeof import("../../web/login-qr.js")> | null = null;
+let webChannelPromise: Promise<typeof import("../../channels/web/index.js")> | null = null;
+let webOutboundPromise: Promise<typeof import("./runtime-whatsapp-outbound.runtime.js")> | null =
   null;
-let webChannelPromise: Promise<
-  typeof import("../../channels/web/index.js")
-> | null = null;
-let webOutboundPromise: Promise<
-  typeof import("./runtime-whatsapp-outbound.runtime.js")
-> | null = null;
-let webLoginPromise: Promise<
-  typeof import("./runtime-whatsapp-login.runtime.js")
-> | null = null;
+let webLoginPromise: Promise<typeof import("./runtime-whatsapp-login.runtime.js")> | null = null;
 let whatsappActionsPromise: Promise<
   typeof import("../../agents/tools/whatsapp-actions.js")
 > | null = null;

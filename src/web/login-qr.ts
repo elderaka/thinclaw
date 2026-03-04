@@ -85,9 +85,7 @@ async function restartLoginSocket(login: ActiveLogin, runtime: RuntimeEnv) {
   }
   login.restartAttempted = true;
   runtime.log(
-    info(
-      "WhatsApp asked for a restart after pairing (code 515); retrying connection once…",
-    ),
+    info("WhatsApp asked for a restart after pairing (code 515); retrying connection once…"),
   );
   closeSocket(login.sock);
   try {
@@ -274,6 +272,7 @@ export async function startWebLoginWithPairingCode(
     const code = await sock.requestPairingCode(phoneNumber);
     if (code) {
       pairingCode = code.match(/.{1,4}/g)?.join("-") ?? code; // Format as XXXX-XXXX
+      runtime.log(info(`WhatsApp pairing code requested for ${phoneNumber}: ${pairingCode}`));
     }
   } catch (err) {
     await resetActiveLogin(account.accountId);
@@ -318,23 +317,18 @@ export async function waitForWebLogin(
     if (remaining <= 0) {
       return {
         connected: false,
-        message:
-          "Still waiting for the QR scan. Let me know when you’ve scanned it.",
+        message: "Still waiting for the QR scan. Let me know when you’ve scanned it.",
       };
     }
     const timeout = new Promise<"timeout">((resolve) =>
       setTimeout(() => resolve("timeout"), remaining),
     );
-    const result = await Promise.race([
-      login.waitPromise.then(() => "done"),
-      timeout,
-    ]);
+    const result = await Promise.race([login.waitPromise.then(() => "done"), timeout]);
 
     if (result === "timeout") {
       return {
         connected: false,
-        message:
-          "Still waiting for the QR scan. Let me know when you’ve scanned it.",
+        message: "Still waiting for the QR scan. Let me know when you’ve scanned it.",
       };
     }
 

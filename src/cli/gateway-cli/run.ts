@@ -1,10 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Command } from "commander";
-import type {
-  GatewayAuthMode,
-  GatewayTailscaleMode,
-} from "../../config/config.js";
+import type { GatewayAuthMode, GatewayTailscaleMode } from "../../config/config.js";
 import {
   CONFIG_PATH,
   loadConfig,
@@ -19,10 +16,7 @@ import { setGatewayWsLogStyle } from "../../gateway/ws-logging.js";
 import { setVerbose } from "../../globals.js";
 import { GatewayLockError } from "../../infra/gateway-lock.js";
 import { formatPortDiagnostics, inspectPortUsage } from "../../infra/ports.js";
-import {
-  setConsoleSubsystemFilter,
-  setConsoleTimestampPrefix,
-} from "../../logging/console.js";
+import { setConsoleSubsystemFilter, setConsoleTimestampPrefix } from "../../logging/console.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { defaultRuntime } from "../../runtime.js";
 import { formatCliCommand } from "../command-format.js";
@@ -89,11 +83,7 @@ const GATEWAY_AUTH_MODES: readonly GatewayAuthMode[] = [
   "password",
   "trusted-proxy",
 ];
-const GATEWAY_TAILSCALE_MODES: readonly GatewayTailscaleMode[] = [
-  "off",
-  "serve",
-  "funnel",
-];
+const GATEWAY_TAILSCALE_MODES: readonly GatewayTailscaleMode[] = ["off", "serve", "funnel"];
 
 function parseEnumOption<T extends string>(
   raw: string | undefined,
@@ -123,10 +113,7 @@ function formatModeErrorList<T extends string>(modes: readonly T[]): string {
   return `${quoted.slice(0, -1).join(", ")}, or ${quoted[quoted.length - 1]}`;
 }
 
-function resolveGatewayRunOptions(
-  opts: GatewayRunOpts,
-  command?: Command,
-): GatewayRunOpts {
+function resolveGatewayRunOptions(opts: GatewayRunOpts, command?: Command): GatewayRunOpts {
   const resolved: GatewayRunOpts = { ...opts };
 
   for (const key of GATEWAY_RUN_VALUE_KEYS) {
@@ -148,8 +135,7 @@ function resolveGatewayRunOptions(
 }
 
 async function runGatewayCommand(opts: GatewayRunOpts) {
-  const isDevProfile =
-    process.env.OPENCLAW_PROFILE?.trim().toLowerCase() === "dev";
+  const isDevProfile = process.env.OPENCLAW_PROFILE?.trim().toLowerCase() === "dev";
   const devMode = Boolean(opts.dev) || isDevProfile;
   if (opts.reset && !devMode) {
     defaultRuntime.error("Use --reset with --dev.");
@@ -163,9 +149,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
     setConsoleSubsystemFilter(["agent/claude-cli"]);
     process.env.OPENCLAW_CLAUDE_CLI_LOG_OUTPUT = "1";
   }
-  const wsLogRaw = (opts.compact ? "compact" : opts.wsLog) as
-    | string
-    | undefined;
+  const wsLogRaw = (opts.compact ? "compact" : opts.wsLog) as string | undefined;
   const wsLogStyle: GatewayWsLogStyle =
     wsLogRaw === "compact" ? "compact" : wsLogRaw === "full" ? "full" : "auto";
   if (
@@ -212,20 +196,17 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
       ? bindRaw
       : null;
   if (!bind) {
-    defaultRuntime.error(
-      'Invalid --bind (use "loopback", "lan", "tailnet", "auto", or "custom")',
-    );
+    defaultRuntime.error('Invalid --bind (use "loopback", "lan", "tailnet", "auto", or "custom")');
     defaultRuntime.exit(1);
     return;
   }
   if (opts.force) {
     try {
-      const { killed, waitedMs, escalatedToSigkill } =
-        await forceFreePortAndWait(port, {
-          timeoutMs: 2000,
-          intervalMs: 100,
-          sigtermTimeoutMs: 700,
-        });
+      const { killed, waitedMs, escalatedToSigkill } = await forceFreePortAndWait(port, {
+        timeoutMs: 2000,
+        intervalMs: 100,
+        sigtermTimeoutMs: 700,
+      });
       if (killed.length === 0) {
         gatewayLog.info(`force: no listeners on port ${port}`);
       } else {
@@ -235,14 +216,10 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
           );
         }
         if (escalatedToSigkill) {
-          gatewayLog.info(
-            `force: escalated to SIGKILL while freeing port ${port}`,
-          );
+          gatewayLog.info(`force: escalated to SIGKILL while freeing port ${port}`);
         }
         if (waitedMs > 0) {
-          gatewayLog.info(
-            `force: waited ${waitedMs}ms for port ${port} to free`,
-          );
+          gatewayLog.info(`force: waited ${waitedMs}ms for port ${port} to free`);
         }
       }
       // After killing, verify the port is actually bindable (handles TIME_WAIT).
@@ -260,9 +237,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
         host: bindProbeHost,
       });
       if (bindWaitMs > 0) {
-        gatewayLog.info(
-          `force: waited ${bindWaitMs}ms for port ${port} to become bindable`,
-        );
+        gatewayLog.info(`force: waited ${bindWaitMs}ms for port ${port} to become bindable`);
       }
     } catch (err) {
       defaultRuntime.error(`Force: ${String(err)}`);
@@ -279,9 +254,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   const authModeRaw = toOptionString(opts.auth);
   const authMode = parseEnumOption(authModeRaw, GATEWAY_AUTH_MODES);
   if (authModeRaw && !authMode) {
-    defaultRuntime.error(
-      `Invalid --auth (use ${formatModeErrorList(GATEWAY_AUTH_MODES)})`,
-    );
+    defaultRuntime.error(`Invalid --auth (use ${formatModeErrorList(GATEWAY_AUTH_MODES)})`);
     defaultRuntime.exit(1);
     return;
   }
@@ -299,11 +272,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
 
   const snapshot = await readConfigFileSnapshot().catch(() => null);
   const configExists = snapshot?.exists ?? fs.existsSync(CONFIG_PATH);
-  const configAuditPath = path.join(
-    resolveStateDir(process.env),
-    "logs",
-    "config-audit.jsonl",
-  );
+  const configAuditPath = path.join(resolveStateDir(process.env), "logs", "config-audit.jsonl");
   const mode = cfg.gateway?.mode;
   if (!opts.allowUnconfigured && mode !== "local") {
     if (!configExists) {
@@ -338,19 +307,14 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   const resolvedAuthMode = resolvedAuth.mode;
   const tokenValue = resolvedAuth.token;
   const passwordValue = resolvedAuth.password;
-  const hasToken =
-    typeof tokenValue === "string" && tokenValue.trim().length > 0;
-  const hasPassword =
-    typeof passwordValue === "string" && passwordValue.trim().length > 0;
+  const hasToken = typeof tokenValue === "string" && tokenValue.trim().length > 0;
+  const hasPassword = typeof passwordValue === "string" && passwordValue.trim().length > 0;
   const hasSharedSecret =
-    (resolvedAuthMode === "token" && hasToken) ||
-    (resolvedAuthMode === "password" && hasPassword);
+    (resolvedAuthMode === "token" && hasToken) || (resolvedAuthMode === "password" && hasPassword);
   const canBootstrapToken = resolvedAuthMode === "token" && !hasToken;
   const authHints: string[] = [];
   if (miskeys.hasGatewayToken) {
-    authHints.push(
-      'Found "gateway.token" in config. Use "gateway.auth.token" instead.',
-    );
+    authHints.push('Found "gateway.token" in config. Use "gateway.auth.token" instead.');
   }
   if (miskeys.hasRemoteToken) {
     authHints.push(
@@ -418,9 +382,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   } catch (err) {
     if (
       err instanceof GatewayLockError ||
-      (err &&
-        typeof err === "object" &&
-        (err as { name?: string }).name === "GatewayLockError")
+      (err && typeof err === "object" && (err as { name?: string }).name === "GatewayLockError")
     ) {
       const errMessage = describeUnknownError(err);
       defaultRuntime.error(
@@ -456,10 +418,7 @@ export function addGatewayRunCommand(cmd: Command): Command {
       "--token <token>",
       "Shared token required in connect.params.auth.token (default: OPENCLAW_GATEWAY_TOKEN env if set)",
     )
-    .option(
-      "--auth <mode>",
-      `Gateway auth mode (${formatModeChoices(GATEWAY_AUTH_MODES)})`,
-    )
+    .option("--auth <mode>", `Gateway auth mode (${formatModeChoices(GATEWAY_AUTH_MODES)})`)
     .option("--password <password>", "Password for auth mode=password")
     .option(
       "--tailscale <mode>",
@@ -475,32 +434,20 @@ export function addGatewayRunCommand(cmd: Command): Command {
       "Allow gateway start without gateway.mode=local in config",
       false,
     )
-    .option(
-      "--dev",
-      "Create a dev config + workspace if missing (no BOOTSTRAP.md)",
-      false,
-    )
+    .option("--dev", "Create a dev config + workspace if missing (no BOOTSTRAP.md)", false)
     .option(
       "--reset",
       "Reset dev config + credentials + sessions + workspace (requires --dev)",
       false,
     )
-    .option(
-      "--force",
-      "Kill any existing listener on the target port before starting",
-      false,
-    )
+    .option("--force", "Kill any existing listener on the target port before starting", false)
     .option("--verbose", "Verbose logging to stdout/stderr", false)
     .option(
       "--claude-cli-logs",
       "Only show claude-cli logs in the console (includes stdout/stderr)",
       false,
     )
-    .option(
-      "--ws-log <style>",
-      'WebSocket log style ("auto"|"full"|"compact")',
-      "auto",
-    )
+    .option("--ws-log <style>", 'WebSocket log style ("auto"|"full"|"compact")', "auto")
     .option("--compact", 'Alias for "--ws-log compact"', false)
     .option("--raw-stream", "Log raw model stream events to jsonl", false)
     .option("--raw-stream-path <path>", "Raw stream jsonl path")

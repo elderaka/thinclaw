@@ -9,10 +9,7 @@ const BARE_SESSION_RESET_PROMPT_BASE =
  * know which daily memory files to read during their Session Startup sequence.
  * Without this, agents on /new or /reset guess the date from their training cutoff.
  */
-export function buildBareSessionResetPrompt(
-  cfg?: OpenClawConfig,
-  nowMs?: number,
-): string {
+export function buildBareSessionResetPrompt(cfg?: OpenClawConfig, nowMs?: number): string {
   return appendCronStyleCurrentTimeLine(
     BARE_SESSION_RESET_PROMPT_BASE,
     cfg ?? {},
