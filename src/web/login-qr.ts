@@ -199,7 +199,14 @@ export async function startWebLoginWithQr(
     qr = await qrPromise;
   } catch (err) {
     clearTimeout(qrTimer);
-    await resetActiveLogin(account.accountId);
+    // Guard against clobbering a concurrent invocation's login: if another
+    // startWebLoginWithQr call replaced our entry in activeLogins while we were
+    // waiting (e.g. after a 30-second QR timeout), leave the newer login alone.
+    if (activeLogins.get(account.accountId)?.id === login.id) {
+      await resetActiveLogin(account.accountId);
+    } else {
+      closeSocket(login.sock);
+    }
     return {
       message: `Failed to get QR: ${String(err)}`,
     };
