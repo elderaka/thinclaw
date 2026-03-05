@@ -346,8 +346,17 @@ export async function waitForWebLogin(
         return { connected: false, message };
       }
       if (login.errorStatus === 515) {
-        const restarted = await restartLoginSocket(login, runtime);
-        if (restarted && isLoginFresh(login)) {
+        if (!login.restartAttempted) {
+          // First caller: perform the one-time socket restart that WA 515 requires.
+          const restarted = await restartLoginSocket(login, runtime);
+          if (restarted && isLoginFresh(login)) {
+            continue;
+          }
+        } else if (isLoginFresh(login)) {
+          // A concurrent waitForWebLogin call is already restarting the socket.
+          // Calling resetActiveLogin here would kill the newly-created socket, so
+          // instead back off briefly and loop back to await the new wait-promise.
+          await new Promise<void>((resolve) => setTimeout(resolve, 1500));
           continue;
         }
       }
