@@ -6,6 +6,10 @@
 **/.tmp
 .DS_Store
 **/.DS_Store
+
+# Never bake user credentials / runtime state into the image
+.openclaw
+**/.openclaw
 *.png
 *.jpg
 *.jpeg

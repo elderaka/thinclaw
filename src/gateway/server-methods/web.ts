@@ -146,8 +146,18 @@ export const webHandlers: GatewayRequestHandlers = {
       });
       if (result.connected) {
         await context.startChannel(provider.id, accountId);
+        const message = result.who
+          ? `✅ Linked! WhatsApp is ready (${result.who}).`
+          : result.message;
+        respond(true, { ...result, message }, undefined);
+      } else {
+        // Auto-logout on login failure so the next attempt starts clean.
+        if (provider.gateway.logoutByAccountId) {
+          const logoutResult = await provider.gateway.logoutByAccountId({ accountId });
+          context.markChannelLoggedOut(provider.id, logoutResult.cleared, accountId);
+        }
+        respond(true, result, undefined);
       }
-      respond(true, result, undefined);
     } catch (err) {
       respond(false, undefined, errorShape(ErrorCodes.UNAVAILABLE, formatForLog(err)));
     }

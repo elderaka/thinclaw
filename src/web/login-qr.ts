@@ -358,7 +358,9 @@ export async function waitForWebLogin(
     }
 
     if (login.connected) {
-      const message = "✅ Linked! WhatsApp is ready.";
+      const selfId = readWebSelfId(login.authDir);
+      const who = selfId.e164 ?? selfId.jid ?? undefined;
+      const message = "\u2705 Linked! WhatsApp is ready.";
       runtime.log(success(message));
       await resetActiveLogin(account.accountId);
       return { connected: true, message };

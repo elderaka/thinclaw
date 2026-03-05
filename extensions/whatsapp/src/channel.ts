@@ -454,6 +454,13 @@ export const whatsappPlugin: ChannelPlugin<ResolvedWhatsAppAccount> = {
         accountId,
         timeoutMs,
       }),
+    logoutByAccountId: async ({ runtime }) => {
+      // logoutWeb defaults to resolveDefaultWebAuthDir() when authDir is omitted,
+      // which is correct for single-account setups. Multi-account support would
+      // require resolving authDir from accountId (needs loadConfig, not in plugin SDK).
+      const cleared = await getWhatsAppRuntime().channel.whatsapp.logoutWeb({ runtime });
+      return { cleared, loggedOut: cleared };
+    },
     logoutAccount: async ({ account, runtime }) => {
       const cleared = await getWhatsAppRuntime().channel.whatsapp.logoutWeb({
         authDir: account.authDir,
