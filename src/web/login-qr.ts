@@ -395,7 +395,14 @@ export async function waitForWebLogin(
  * 515-restart with creds-flush wait, no shared `activeLogins` state.
  * The QR is delivered via `opts.onQr` as a PNG data URL.
  * Used by the gateway `web.login.qrSession` handler.
+ *
+ * Only one session per accountId runs at a time — starting a new session
+ * closes a previous one so stale sockets can't trash freshly-saved credentials.
  */
+
+/** Tracks the live socket for each accountId so a new call can cancel the previous one. */
+const ongoingQrSessions = new Map<string, WaSocket>();
+
 export async function loginWebWithQrCapture(opts: {
   onQr: (qrDataUrl: string) => void;
   verbose?: boolean;
@@ -406,6 +413,7 @@ export async function loginWebWithQrCapture(opts: {
   const runtime = opts.runtime ?? defaultRuntime;
   const cfg = loadConfig();
   const account = resolveWhatsAppAccount({ cfg, accountId: opts.accountId });
+  const accountId = account.accountId;
 
   if (!opts.force) {
     const hasWeb = await webAuthExists(account.authDir);
@@ -416,6 +424,14 @@ export async function loginWebWithQrCapture(opts: {
     }
   }
 
+  // Close any previous in-flight QR session for this account so we don't have
+  // two sockets competing and clobbering each other's credentials on loggedOut.
+  const prev = ongoingQrSessions.get(accountId);
+  if (prev) {
+    closeSocket(prev);
+    ongoingQrSessions.delete(accountId);
+  }
+
   const sock = await createWaSocket(false, Boolean(opts.verbose), {
     authDir: account.authDir,
     onQr: async (qr: string) => {
@@ -423,6 +439,7 @@ export async function loginWebWithQrCapture(opts: {
       opts.onQr(`data:image/png;base64,${base64}`);
     },
   });
+  ongoingQrSessions.set(accountId, sock);
 
   try {
     await waitForWaConnection(sock);
@@ -440,6 +457,7 @@ export async function loginWebWithQrCapture(opts: {
       const retry = await createWaSocket(false, Boolean(opts.verbose), {
         authDir: account.authDir,
       });
+      ongoingQrSessions.set(accountId, retry);
       try {
         await waitForWaConnection(retry);
         const selfId = readWebSelfId(account.authDir);
@@ -455,16 +473,17 @@ export async function loginWebWithQrCapture(opts: {
         setTimeout(() => closeSocket(retry), 500);
       }
     }
-    if (code === DisconnectReason.loggedOut) {
-      await logoutWeb({
-        authDir: account.authDir,
-        isLegacyAuthDir: account.isLegacyAuthDir,
-        runtime,
-      });
-      return { connected: false, message: "Session logged out; cache cleared. Please scan again." };
-    }
+    // For loggedOut: do NOT call logoutWeb here. A concurrent session (CLI or
+    // another browser tab) may have just successfully paired and written valid
+    // credentials. Clearing them here would nuke a working session. Just report
+    // failure and let the caller decide whether to re-pair.
     return { connected: false, message: `WhatsApp login failed: ${formatError(err)}` };
   } finally {
+    // Only remove from the map if this session is still the current one
+    // (a newer session may have already replaced it).
+    if (ongoingQrSessions.get(accountId) === sock) {
+      ongoingQrSessions.delete(accountId);
+    }
     setTimeout(() => closeSocket(sock), 500);
   }
 }
