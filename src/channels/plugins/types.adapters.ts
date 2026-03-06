@@ -298,6 +298,17 @@ export type ChannelGatewayAdapter<ResolvedAccount = unknown> = {
     timeoutMs?: number;
   }) => Promise<ChannelLoginWithQrWaitResult>;
   /**
+   * Single-call QR session that mirrors the CLI flow exactly: one linear
+   * socket lifecycle with inline 515-restart.  The QR is delivered via the
+   * `onQr` callback so the caller can push it over an open WS connection as an
+   * event before the final RPC result.
+   */
+  loginWithQrSession?: (params: {
+    accountId?: string;
+    force?: boolean;
+    onQr: (qrDataUrl: string) => void;
+  }) => Promise<ChannelLoginWithQrWaitResult>;
+  /**
    * Clears stored credentials for the given account without needing the resolved account object.
    * Used by the gateway handler to auto-logout after a failed login attempt.
    */

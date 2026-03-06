@@ -12,6 +12,7 @@ import {
   getStatusCode,
   logoutWeb,
   readWebSelfId,
+  waitForCredsSave,
   waitForWaConnection,
   webAuthExists,
 } from "./session.js";
@@ -383,5 +384,84 @@ export async function waitForWebLogin(
     }
 
     return { connected: false, message: "Login ended without a connection." };
+  }
+}
+
+/**
+ * QR login flow that mirrors the CLI `loginWeb` exactly: one socket, inline
+ * 515-restart with creds-flush wait, no shared `activeLogins` state.
+ * The QR is delivered via `opts.onQr` as a PNG data URL.
+ * Used by the gateway `web.login.qrSession` handler.
+ */
+export async function loginWebWithQrCapture(opts: {
+  onQr: (qrDataUrl: string) => void;
+  verbose?: boolean;
+  force?: boolean;
+  accountId?: string;
+  runtime?: RuntimeEnv;
+}): Promise<{ connected: boolean; message: string; who?: string }> {
+  const runtime = opts.runtime ?? defaultRuntime;
+  const cfg = loadConfig();
+  const account = resolveWhatsAppAccount({ cfg, accountId: opts.accountId });
+
+  if (!opts.force) {
+    const hasWeb = await webAuthExists(account.authDir);
+    if (hasWeb) {
+      const selfId = readWebSelfId(account.authDir);
+      const who = selfId.e164 ?? selfId.jid ?? "unknown";
+      return { connected: true, message: `WhatsApp is already linked (${who}).`, who };
+    }
+  }
+
+  const sock = await createWaSocket(false, Boolean(opts.verbose), {
+    authDir: account.authDir,
+    onQr: async (qr: string) => {
+      const base64 = await renderQrPngBase64(qr);
+      opts.onQr(`data:image/png;base64,${base64}`);
+    },
+  });
+
+  try {
+    await waitForWaConnection(sock);
+    const selfId = readWebSelfId(account.authDir);
+    const who = selfId.e164 ?? selfId.jid ?? "unknown";
+    return { connected: true, message: `✅ Linked! (${who})`, who };
+  } catch (err) {
+    const code = getStatusCode(err);
+    if (code === 515) {
+      runtime.log(info("WhatsApp asked for a restart after pairing (code 515); retrying once…"));
+      closeSocket(sock);
+      // Wait for Baileys to flush the pairing creds to disk before creating the
+      // new socket that will read them — eliminating the read-before-write race.
+      await waitForCredsSave();
+      const retry = await createWaSocket(false, Boolean(opts.verbose), {
+        authDir: account.authDir,
+      });
+      try {
+        await waitForWaConnection(retry);
+        const selfId = readWebSelfId(account.authDir);
+        const who = selfId.e164 ?? selfId.jid ?? "unknown";
+        runtime.log(success("✅ Linked after restart; web session ready."));
+        return { connected: true, message: `✅ Linked after restart! (${who})`, who };
+      } catch (retryErr) {
+        return {
+          connected: false,
+          message: `WhatsApp login failed after restart: ${formatError(retryErr)}`,
+        };
+      } finally {
+        setTimeout(() => closeSocket(retry), 500);
+      }
+    }
+    if (code === DisconnectReason.loggedOut) {
+      await logoutWeb({
+        authDir: account.authDir,
+        isLegacyAuthDir: account.isLegacyAuthDir,
+        runtime,
+      });
+      return { connected: false, message: "Session logged out; cache cleared. Please scan again." };
+    }
+    return { connected: false, message: `WhatsApp login failed: ${formatError(err)}` };
+  } finally {
+    setTimeout(() => closeSocket(sock), 500);
   }
 }

@@ -59,7 +59,7 @@ export const whatsappPlugin: ChannelPlugin<ResolvedWhatsAppAccount> = {
     media: true,
   },
   reload: { configPrefixes: ["web"], noopPrefixes: ["channels.whatsapp"] },
-  gatewayMethods: ["web.login.start", "web.login.wait"],
+  gatewayMethods: ["web.login.start", "web.login.wait", "web.login.qrSession"],
   configSchema: buildChannelConfigSchema(WhatsAppConfigSchema),
   config: {
     listAccountIds: (cfg) => listWhatsAppAccountIds(cfg),
@@ -453,6 +453,12 @@ export const whatsappPlugin: ChannelPlugin<ResolvedWhatsAppAccount> = {
       await getWhatsAppRuntime().channel.whatsapp.waitForWebLogin({
         accountId,
         timeoutMs,
+      }),
+    loginWithQrSession: async ({ accountId, force, onQr }) =>
+      await getWhatsAppRuntime().channel.whatsapp.loginWebWithQrCapture({
+        accountId,
+        force,
+        onQr,
       }),
     logoutByAccountId: async ({ runtime }) => {
       // logoutWeb defaults to resolveDefaultWebAuthDir() when authDir is omitted,

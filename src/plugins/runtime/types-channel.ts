@@ -143,6 +143,7 @@ export type PluginRuntimeChannel = {
     startWebLoginWithQr: typeof import("../../web/login-qr.js").startWebLoginWithQr;
     startWebLoginWithPairingCode: typeof import("../../web/login-qr.js").startWebLoginWithPairingCode;
     waitForWebLogin: typeof import("../../web/login-qr.js").waitForWebLogin;
+    loginWebWithQrCapture: typeof import("../../web/login-qr.js").loginWebWithQrCapture;
     monitorWebChannel: typeof import("../../channels/web/index.js").monitorWebChannel;
     handleWhatsAppAction: typeof import("../../agents/tools/whatsapp-actions.js").handleWhatsAppAction;
     createLoginTool: typeof import("../../channels/plugins/agent-tools/whatsapp-login.js").createWhatsAppLoginTool;

@@ -10,7 +10,7 @@ import {
 import { formatForLog } from "../ws-log.js";
 import type { GatewayRequestHandlers, RespondFn } from "./types.js";
 
-const WEB_LOGIN_METHODS = new Set(["web.login.start", "web.login.pairPhone", "web.login.wait"]);
+const WEB_LOGIN_METHODS = new Set(["web.login.start", "web.login.pairPhone", "web.login.wait", "web.login.qrSession"]);
 
 const resolveWebLoginProvider = () =>
   listChannelPlugins().find((plugin) =>
@@ -161,6 +161,42 @@ export const webHandlers: GatewayRequestHandlers = {
           const logoutResult = await provider.gateway.logoutByAccountId({ accountId });
           context.markChannelLoggedOut(provider.id, logoutResult.cleared, accountId);
         }
+        respond(true, result, undefined);
+      }
+    } catch (err) {
+      respond(false, undefined, errorShape(ErrorCodes.UNAVAILABLE, formatForLog(err)));
+    }
+  },
+  "web.login.qrSession": async ({ params, respond, context, client }) => {
+    try {
+      const accountId = resolveAccountId(params);
+      const provider = resolveWebLoginProvider();
+      if (!provider) {
+        respondProviderUnavailable(respond);
+        return;
+      }
+      if (!provider.gateway?.loginWithQrSession) {
+        respondProviderUnsupported(respond, provider.id);
+        return;
+      }
+      await context.stopChannel(provider.id, accountId);
+      const connId = client?.connId;
+      const result = await provider.gateway.loginWithQrSession({
+        force: Boolean((params as { force?: boolean }).force),
+        accountId,
+        onQr: (qrDataUrl: string) => {
+          if (connId) {
+            context.broadcastToConnIds(new Set([connId]), "web.qr", { qrDataUrl });
+          }
+        },
+      });
+      if (result.connected) {
+        await context.startChannel(provider.id, accountId);
+        const message = result.who
+          ? `✅ Linked! WhatsApp is ready (${result.who}).`
+          : result.message;
+        respond(true, { ...result, message }, undefined);
+      } else {
         respond(true, result, undefined);
       }
     } catch (err) {

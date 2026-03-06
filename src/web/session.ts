@@ -32,6 +32,16 @@ export {
 } from "./auth-store.js";
 
 let credsSaveQueue: Promise<void> = Promise.resolve();
+
+/**
+ * Returns a promise that resolves once all pending credential saves from
+ * `enqueueSaveCreds` have completed.  Call this before creating a new socket
+ * from the same authDir so the new socket always reads up-to-date credentials.
+ */
+export function waitForCredsSave(): Promise<void> {
+  return credsSaveQueue;
+}
+
 function enqueueSaveCreds(
   authDir: string,
   saveCreds: () => Promise<void> | void,
