@@ -82,6 +82,8 @@ type GatewayHost = {
   execApprovalQueue: ExecApprovalRequest[];
   execApprovalError: string | null;
   updateAvailable: UpdateAvailable | null;
+  whatsappLoginQrDataUrl: string | null;
+  whatsappLoginMessage: string | null;
 };
 
 type SessionDefaultsSnapshot = {
@@ -396,6 +398,15 @@ function handleGatewayEventUnsafe(host: GatewayHost, evt: GatewayEventFrame) {
     const resolved = parseExecApprovalResolved(evt.payload);
     if (resolved) {
       host.execApprovalQueue = removeExecApproval(host.execApprovalQueue, resolved.id);
+    }
+    return;
+  }
+
+  if (evt.event === "web.qr") {
+    const payload = evt.payload as { qrDataUrl?: string } | undefined;
+    if (payload?.qrDataUrl) {
+      host.whatsappLoginQrDataUrl = payload.qrDataUrl;
+      host.whatsappLoginMessage = "Scan this QR in WhatsApp \u2192 Linked Devices.";
     }
     return;
   }

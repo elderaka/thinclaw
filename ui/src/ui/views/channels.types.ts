@@ -36,7 +36,6 @@ export type ChannelsProps = {
   nostrProfileAccountId: string | null;
   onRefresh: (probe: boolean) => void;
   onWhatsAppStart: (force: boolean) => void;
-  onWhatsAppWait: () => void;
   onWhatsAppLogout: () => void;
   onConfigPatch: (path: Array<string | number>, value: unknown) => void;
   onConfigSave: () => void;

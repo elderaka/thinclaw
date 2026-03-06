@@ -317,7 +317,6 @@ export type AppViewState = {
     loadAssistantIdentity: () => Promise<void>;
     loadCron: () => Promise<void>;
     handleWhatsAppStart: (force: boolean) => Promise<void>;
-    handleWhatsAppWait: () => Promise<void>;
     handleWhatsAppLogout: () => Promise<void>;
     handleChannelConfigSave: () => Promise<void>;
     handleChannelConfigReload: () => Promise<void>;

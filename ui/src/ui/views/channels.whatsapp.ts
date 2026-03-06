@@ -94,13 +94,6 @@ export function renderWhatsAppCard(params: {
           Relink
         </button>
         <button
-          class="btn"
-          ?disabled=${props.whatsappBusy}
-          @click=${() => props.onWhatsAppWait()}
-        >
-          Wait for scan
-        </button>
-        <button
           class="btn danger"
           ?disabled=${props.whatsappBusy}
           @click=${() => props.onWhatsAppLogout()}

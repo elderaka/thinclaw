@@ -3,7 +3,6 @@ import {
   loadChannels,
   logoutWhatsApp,
   startWhatsAppLogin,
-  waitWhatsAppLogin,
 } from "./controllers/channels.ts";
 import { loadConfig, saveConfig } from "./controllers/config.ts";
 import type { NostrProfile } from "./types.ts";
@@ -14,10 +13,6 @@ export async function handleWhatsAppStart(host: OpenClawApp, force: boolean) {
   await loadChannels(host, true);
 }
 
-export async function handleWhatsAppWait(host: OpenClawApp) {
-  await waitWhatsAppLogin(host);
-  await loadChannels(host, true);
-}
 
 export async function handleWhatsAppLogout(host: OpenClawApp) {
   await logoutWhatsApp(host);
