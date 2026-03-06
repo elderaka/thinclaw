@@ -185,7 +185,10 @@ export async function waitForWaConnection(sock: ReturnType<typeof makeWASocket>)
       }
       if (update.connection === "close") {
         evWithOff.off?.("connection.update", handler);
-        reject(update.lastDisconnect ?? new Error("Connection closed"));
+        // lastDisconnect is { error: Boom, date: Date }; pass the Boom directly so
+        // getStatusCode() callers can read .output.statusCode (e.g. 515) without
+        // needing to unwrap the intermediate object.
+        reject(update.lastDisconnect?.error ?? update.lastDisconnect ?? new Error("Connection closed"));
       }
     };
 

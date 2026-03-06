@@ -385,7 +385,6 @@ export function renderApp(state: AppViewState) {
                 nostrProfileAccountId: state.nostrProfileAccountId,
                 onRefresh: (probe) => loadChannels(state, probe),
                 onWhatsAppStart: (force) => state.handleWhatsAppStart(force),
-                onWhatsAppWait: () => state.handleWhatsAppWait(),
                 onWhatsAppLogout: () => state.handleWhatsAppLogout(),
                 onConfigPatch: (path, value) => updateConfigFormValue(state, path, value),
                 onConfigSave: () => state.handleChannelConfigSave(),

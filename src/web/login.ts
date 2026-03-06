@@ -5,7 +5,7 @@ import { danger, info, success } from "../globals.js";
 import { logInfo } from "../logger.js";
 import { defaultRuntime, type RuntimeEnv } from "../runtime.js";
 import { resolveWhatsAppAccount } from "./accounts.js";
-import { createWaSocket, formatError, logoutWeb, waitForWaConnection } from "./session.js";
+import { createWaSocket, formatError, getStatusCode, logoutWeb, waitForWaConnection } from "./session.js";
 
 export async function loginWeb(
   verbose: boolean,
@@ -25,8 +25,8 @@ export async function loginWeb(
     console.log(success("✅ Linked! Credentials saved for future sends."));
   } catch (err) {
     const code =
-      (err as { error?: { output?: { statusCode?: number } } })?.error?.output?.statusCode ??
-      (err as { output?: { statusCode?: number } })?.output?.statusCode;
+      (err as { output?: { statusCode?: number } })?.output?.statusCode ??
+      getStatusCode(err);
     if (code === 515) {
       console.log(
         info(

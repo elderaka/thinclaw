@@ -31,36 +31,18 @@ export async function startWhatsAppLogin(state: ChannelsState, force: boolean) {
     return;
   }
   state.whatsappBusy = true;
+  state.whatsappLoginMessage = "Starting QR session\u2026";
+  state.whatsappLoginQrDataUrl = null;
+  state.whatsappLoginConnected = null;
   try {
-    const res = await state.client.request<{ message?: string; qrDataUrl?: string }>(
-      "web.login.start",
+    // web.login.qrSession handles the full flow in one call (start → QR → 515-restart → connected).
+    // The QR image arrives as a "web.qr" gateway event mid-call which app-gateway.ts forwards
+    // into whatsappLoginQrDataUrl so the UI updates before the final response.
+    const res = await state.client.request<{ message?: string; connected?: boolean; who?: string }>(
+      "web.login.qrSession",
       {
         force,
-        timeoutMs: 30000,
-      },
-    );
-    state.whatsappLoginMessage = res.message ?? null;
-    state.whatsappLoginQrDataUrl = res.qrDataUrl ?? null;
-    state.whatsappLoginConnected = null;
-  } catch (err) {
-    state.whatsappLoginMessage = String(err);
-    state.whatsappLoginQrDataUrl = null;
-    state.whatsappLoginConnected = null;
-  } finally {
-    state.whatsappBusy = false;
-  }
-}
-
-export async function waitWhatsAppLogin(state: ChannelsState) {
-  if (!state.client || !state.connected || state.whatsappBusy) {
-    return;
-  }
-  state.whatsappBusy = true;
-  try {
-    const res = await state.client.request<{ message?: string; connected?: boolean }>(
-      "web.login.wait",
-      {
-        timeoutMs: 120000,
+        timeoutMs: 180000,
       },
     );
     state.whatsappLoginMessage = res.message ?? null;
@@ -70,6 +52,7 @@ export async function waitWhatsAppLogin(state: ChannelsState) {
     }
   } catch (err) {
     state.whatsappLoginMessage = String(err);
+    state.whatsappLoginQrDataUrl = null;
     state.whatsappLoginConnected = null;
   } finally {
     state.whatsappBusy = false;

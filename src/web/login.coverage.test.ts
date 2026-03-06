@@ -39,6 +39,10 @@ vi.mock("./session.js", () => {
     createWaSocket,
     waitForWaConnection,
     formatError,
+    getStatusCode: vi.fn((err: unknown) =>
+      (err as { output?: { statusCode?: number } })?.output?.statusCode ??
+      (err as { status?: number })?.status,
+    ),
     WA_WEB_AUTH_DIR: authDir,
     logoutWeb: vi.fn(async (params: { authDir?: string }) => {
       await fs.rm(params.authDir ?? authDir, {

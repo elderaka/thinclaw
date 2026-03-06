@@ -12,7 +12,6 @@ import {
   handleNostrProfileToggleAdvanced as handleNostrProfileToggleAdvancedInternal,
   handleWhatsAppLogout as handleWhatsAppLogoutInternal,
   handleWhatsAppStart as handleWhatsAppStartInternal,
-  handleWhatsAppWait as handleWhatsAppWaitInternal,
 } from "./app-channels.ts";
 import {
   handleAbortChat as handleAbortChatInternal,
@@ -503,10 +502,6 @@ export class OpenClawApp extends LitElement {
 
   async handleWhatsAppStart(force: boolean) {
     await handleWhatsAppStartInternal(this, force);
-  }
-
-  async handleWhatsAppWait() {
-    await handleWhatsAppWaitInternal(this);
   }
 
   async handleWhatsAppLogout() {
