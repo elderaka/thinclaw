@@ -98,6 +98,14 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     includeInOpenClawGroup: true,
   },
   {
+    id: "kb_search",
+    label: "kb_search",
+    description: "Search knowledge base",
+    sectionId: "web",
+    profiles: [],
+    includeInOpenClawGroup: true,
+  },
+  {
     id: "memory_search",
     label: "memory_search",
     description: "Semantic search",
