@@ -162,6 +162,9 @@ export function createOpenClawTools(options?: {
         const n = Number.parseInt(raw, 10);
         return Number.isFinite(n) ? n : 0;
       })(),
+      // On VPS installs the backend is usually reachable on localhost.
+      // Allow override for docker/remote deployments.
+      backendUrl: process.env.PLEIADES_BACKEND_URL || "http://127.0.0.1:8000",
     }),
     createAgentsListTool({
       agentSessionKey: options?.agentSessionKey,
