@@ -1,7 +1,7 @@
 import { Type } from "@sinclair/typebox";
+import { createSubsystemLogger } from "../../logging/subsystem.js";
 import type { AnyAgentTool } from "./common.js";
 import { jsonResult, ToolInputError, readStringParam, readNumberParam } from "./common.js";
-import { createSubsystemLogger } from "../../logging/subsystem.js";
 
 const log = createSubsystemLogger("kb-search");
 
@@ -61,11 +61,11 @@ export function createKBSearchTool(opts?: {
       // Get tenant ID
       const rawTenantId = opts?.tenantId;
       const tenantId =
-        typeof rawTenantId === "string"
-          ? Number.parseInt(rawTenantId, 10)
-          : rawTenantId;
+        typeof rawTenantId === "string" ? Number.parseInt(rawTenantId, 10) : rawTenantId;
 
-      if (!tenantId || Number.isNaN(tenantId) || tenantId <= 0) {
+      // tenant_id=0 is reserved for the "Main (VPS)" KB namespace.
+      // Only reject missing/invalid values and negative tenant IDs.
+      if (tenantId === undefined || Number.isNaN(tenantId) || tenantId < 0) {
         throw new ToolInputError("Tenant ID not configured. Cannot search knowledge base.");
       }
 
@@ -87,12 +87,8 @@ export function createKBSearchTool(opts?: {
 
         if (!response.ok) {
           const errorText = await response.text().catch(() => "");
-          log.warn(
-            `kb_search failed: ${response.status} ${response.statusText} - ${errorText}`,
-          );
-          throw new Error(
-            `KB search failed (${response.status}): ${response.statusText}`,
-          );
+          log.warn(`kb_search failed: ${response.status} ${response.statusText} - ${errorText}`);
+          throw new Error(`KB search failed (${response.status}): ${response.statusText}`);
         }
 
         const data = (await response.json()) as KBSearchResponse;
@@ -107,9 +103,7 @@ export function createKBSearchTool(opts?: {
         }));
 
         if (formatted.length > 0) {
-          log.info(
-            `kb_search: query="${query}" tenant_id=${tenantId} results=${formatted.length}`,
-          );
+          log.info(`kb_search: query="${query}" tenant_id=${tenantId} results=${formatted.length}`);
         }
 
         return jsonResult({

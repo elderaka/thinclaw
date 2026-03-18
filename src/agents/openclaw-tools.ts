@@ -152,7 +152,16 @@ export function createOpenClawTools(options?: {
     }),
     createKBSearchTool({
       agentSessionKey: options?.agentSessionKey,
-      tenantId: options?.agentAccountId, // Use account ID as tenant ID
+      // VPS/main installs may use a non-numeric accountId (e.g. "pleiades").
+      // Default to tenant_id=0 (Main KB) when the accountId is missing or not numeric.
+      tenantId: (() => {
+        const raw = options?.agentAccountId;
+        if (!raw) {
+          return 0;
+        }
+        const n = Number.parseInt(raw, 10);
+        return Number.isFinite(n) ? n : 0;
+      })(),
     }),
     createAgentsListTool({
       agentSessionKey: options?.agentSessionKey,
