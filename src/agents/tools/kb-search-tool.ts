@@ -40,7 +40,7 @@ export function createKBSearchTool(opts?: {
   /** Backend API URL (defaults to http://pleiades-backend:8000) */
   backendUrl?: string;
   /** Tenant ID for KB searches - REQUIRED */
-  tenantId?: number;
+  tenantId?: number | string;
 }): AnyAgentTool {
   return {
     label: "Knowledge Base",
@@ -59,8 +59,13 @@ export function createKBSearchTool(opts?: {
       }
 
       // Get tenant ID
-      const tenantId = opts?.tenantId;
-      if (!tenantId || tenantId <= 0) {
+      const rawTenantId = opts?.tenantId;
+      const tenantId =
+        typeof rawTenantId === "string"
+          ? Number.parseInt(rawTenantId, 10)
+          : rawTenantId;
+
+      if (!tenantId || Number.isNaN(tenantId) || tenantId <= 0) {
         throw new ToolInputError("Tenant ID not configured. Cannot search knowledge base.");
       }
 
