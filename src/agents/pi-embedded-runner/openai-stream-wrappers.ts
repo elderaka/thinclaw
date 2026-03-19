@@ -317,7 +317,7 @@ export function createOpenAIResponsesContextManagementWrapper(
             compactThreshold,
           });
         }
-        return originalOnPayload?.(payload, model);
+        return originalOnPayload?.(payload);
       },
     });
   };
@@ -342,7 +342,7 @@ export function createOpenAIFastModeWrapper(baseStreamFn: StreamFn | undefined):
             model,
           });
         }
-        return originalOnPayload?.(payload, model);
+        return originalOnPayload?.(payload);
       },
     });
   };

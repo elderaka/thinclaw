@@ -14,7 +14,7 @@ export function streamWithPayloadPatch(
       if (payload && typeof payload === "object") {
         patchPayload(payload as Record<string, unknown>);
       }
-      return originalOnPayload?.(payload, model);
+      return originalOnPayload?.(payload);
     },
   });
 }

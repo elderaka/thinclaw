@@ -163,7 +163,7 @@ function createParallelToolCallsWrapper(
         if (payload && typeof payload === "object") {
           (payload as Record<string, unknown>).parallel_tool_calls = enabled;
         }
-        return originalOnPayload?.(payload, model);
+        return originalOnPayload?.(payload);
       },
     });
   };

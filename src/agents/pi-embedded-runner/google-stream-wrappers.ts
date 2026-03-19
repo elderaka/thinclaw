@@ -85,7 +85,7 @@ export function createGoogleThinkingPayloadWrapper(
             thinkingLevel,
           });
         }
-        return onPayload?.(payload, model);
+        return onPayload?.(payload);
       },
     });
   };
