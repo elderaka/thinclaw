@@ -3,7 +3,7 @@
  */
 
 import * as crypto from "node:crypto";
-import { createFixedWindowRateLimiter, type FixedWindowRateLimiter } from "openclaw/plugin-sdk";
+import { createFixedWindowRateLimiter, type FixedWindowRateLimiter } from "../api.js";
 
 export type DmAuthorizationResult =
   | { allowed: true }

@@ -4,7 +4,7 @@ import type {
   DmPolicy,
   GroupPolicy,
   SecretInput,
-} from "openclaw/plugin-sdk";
+} from "../runtime-api.js";
 
 export type { DmPolicy, GroupPolicy };
 

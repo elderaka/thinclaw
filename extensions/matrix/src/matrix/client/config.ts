@@ -1,5 +1,5 @@
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
+import { fetchWithSsrFGuard } from "../../../runtime-api.js";
 import { getMatrixRuntime } from "../../runtime.js";
 import {
   normalizeResolvedSecretInputString,

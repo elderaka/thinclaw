@@ -2,57 +2,21 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
+import { pluginSdkSubpaths } from "./scripts/lib/plugin-sdk-entries.mjs";
 
 const repoRoot = path.dirname(fileURLToPath(import.meta.url));
 const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
 const isWindows = process.platform === "win32";
 const localWorkers = Math.max(4, Math.min(16, os.cpus().length));
 const ciWorkers = isWindows ? 2 : 3;
-
 export default defineConfig({
   resolve: {
     // Keep this ordered: the base `openclaw/plugin-sdk` alias is a prefix match.
     alias: [
-      {
-        find: "openclaw/plugin-sdk/account-id",
-        replacement: path.join(repoRoot, "src", "plugin-sdk", "account-id.ts"),
-      },
-      {
-        find: "openclaw/plugin-sdk/core",
-        replacement: path.join(repoRoot, "src", "plugin-sdk", "core.ts"),
-      },
-      {
-        find: "openclaw/plugin-sdk/telegram",
-        replacement: path.join(repoRoot, "src", "plugin-sdk", "telegram.ts"),
-      },
-      {
-        find: "openclaw/plugin-sdk/discord",
-        replacement: path.join(repoRoot, "src", "plugin-sdk", "discord.ts"),
-      },
-      {
-        find: "openclaw/plugin-sdk/slack",
-        replacement: path.join(repoRoot, "src", "plugin-sdk", "slack.ts"),
-      },
-      {
-        find: "openclaw/plugin-sdk/signal",
-        replacement: path.join(repoRoot, "src", "plugin-sdk", "signal.ts"),
-      },
-      {
-        find: "openclaw/plugin-sdk/imessage",
-        replacement: path.join(repoRoot, "src", "plugin-sdk", "imessage.ts"),
-      },
-      {
-        find: "openclaw/plugin-sdk/whatsapp",
-        replacement: path.join(repoRoot, "src", "plugin-sdk", "whatsapp.ts"),
-      },
-      {
-        find: "openclaw/plugin-sdk/line",
-        replacement: path.join(repoRoot, "src", "plugin-sdk", "line.ts"),
-      },
-      {
-        find: "openclaw/plugin-sdk/keyed-async-queue",
-        replacement: path.join(repoRoot, "src", "plugin-sdk", "keyed-async-queue.ts"),
-      },
+      ...pluginSdkSubpaths.map((subpath) => ({
+        find: `openclaw/plugin-sdk/${subpath}`,
+        replacement: path.join(repoRoot, "src", "plugin-sdk", `${subpath}.ts`),
+      })),
       {
         find: "openclaw/plugin-sdk",
         replacement: path.join(repoRoot, "src", "plugin-sdk", "index.ts"),
@@ -73,7 +37,9 @@ export default defineConfig({
       "src/**/*.test.ts",
       "extensions/**/*.test.ts",
       "test/**/*.test.ts",
+      "ui/src/ui/app-chat.test.ts",
       "ui/src/ui/views/agents-utils.test.ts",
+      "ui/src/ui/views/chat.test.ts",
       "ui/src/ui/views/usage-render-details.test.ts",
       "ui/src/ui/controllers/agents.test.ts",
       "ui/src/ui/controllers/chat.test.ts",
@@ -116,7 +82,6 @@ export default defineConfig({
         "src/index.ts",
         "src/runtime.ts",
         "src/channel-web.ts",
-        "src/extensionAPI.ts",
         "src/logging.ts",
         "src/cli/**",
         "src/commands/**",
@@ -172,16 +137,8 @@ export default defineConfig({
         "src/tui/**",
         "src/wizard/**",
         // Channel surfaces are largely integration-tested (or manually validated).
-        "src/discord/**",
-        "src/imessage/**",
-        "src/signal/**",
-        "src/slack/**",
         "src/browser/**",
         "src/channels/web/**",
-        "src/telegram/index.ts",
-        "src/telegram/proxy.ts",
-        "src/telegram/webhook-set.ts",
-        "src/telegram/**",
         "src/webchat/**",
         "src/gateway/server.ts",
         "src/gateway/client.ts",
