@@ -1,4 +1,4 @@
-import { normalizeChannelId } from "../channels/plugins/index.js";
+import { normalizeChatChannelId as normalizeChannelId } from "../channels/registry.js";
 import { resolveAccountEntry } from "../routing/account-lookup.js";
 import { normalizeAccountId } from "../routing/session-key.js";
 import type { OpenClawConfig } from "./config.js";

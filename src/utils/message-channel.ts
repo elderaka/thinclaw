@@ -115,7 +115,7 @@ const listPluginChannelAliases = (): string[] => {
 };
 
 export const listDeliverableMessageChannels = (): ChannelId[] =>
-  Array.from(new Set([...CHANNEL_IDS, ...listPluginChannelIds()]));
+  Array.from(new Set([...CHANNEL_IDS, ...listPluginChannelIds(), INTERNAL_MESSAGE_CHANNEL]));
 
 export type DeliverableMessageChannel = ChannelId;
 

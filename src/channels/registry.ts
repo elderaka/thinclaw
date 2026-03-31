@@ -117,6 +117,16 @@ const CHAT_CHANNEL_META: Record<ChatChannelId, ChannelMeta> = {
     blurb: "LINE Messaging API webhook bot.",
     systemImage: "message",
   },
+  webchat: {
+    id: "webchat",
+    label: "Webchat",
+    selectionLabel: "Webchat",
+    detailLabel: "Internal Webchat",
+    docsPath: "/channels/webchat",
+    docsLabel: "webchat",
+    blurb: "Internal webchat gateway channel.",
+    systemImage: "bubble.left.and.bubble.right.fill",
+  },
 };
 
 export const CHAT_CHANNEL_ALIASES: Record<string, ChatChannelId> = {
